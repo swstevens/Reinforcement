@@ -62,6 +62,27 @@ class ValueIterationAgent(ValueEstimationAgent):
     def runValueIteration(self):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
+        currvalues = util.Counter()
+        for i in range(self.iterations):
+            currvalues = self.values.copy()
+            states = self.mdp.getStates()
+
+            for state in states:
+                val_list=[]
+                actions = self.mdp.getPossibleActions(state)
+                if self.mdp.isTerminal(state):
+                    self.values[state] = 0
+                else:
+                    for action in actions:
+                        val = 0
+                        transitions = self.mdp.getTransitionStatesAndProbs(state,action)
+                        for nextstate, prob in transitions:
+                            val += prob*(self.mdp.getReward(state,action,nextstate) + self.discount*currvalues[nextstate])
+                        val_list.append(val)
+                    self.values[state] = max(val_list)
+                
+                    
+                    
 
 
     def getValue(self, state):
@@ -77,7 +98,12 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+        val = 0
+        transitions = self.mdp.getTransitionStatesAndProbs(state,action)
+        for nextstate, prob in transitions:
+            val += prob*(self.mdp.getReward(state,action,nextstate) + self.discount*self.values[state])
+        return val
 
     def computeActionFromValues(self, state):
         """
@@ -89,7 +115,21 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+        if self.mdp.isTerminal(state):
+            return None
+        bestval = float("-inf")
+        bestaction = 0
+        actions = self.mdp.getPossibleActions(state)
+        for action in actions:
+            val = 0
+            transitions = self.mdp.getTransitionStatesAndProbs(state,action)
+            for nextstate, prob in transitions:
+                val += prob*(self.mdp.getReward(state,action,nextstate) + self.discount*self.values[state])
+            if value > bestval:
+                bestval = value
+                bestaction = action
+        return bestaction
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
