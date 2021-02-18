@@ -167,6 +167,25 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
 
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
+        # TODO Only update state i for iteration i, instead of all iteration 
+        currvalues = util.Counter()
+        for i in range(self.iterations):
+            currvalues = self.values.copy()
+            val_list=[]
+            states = self.mdp.getStates()
+            lenStates = len(states)
+            state = states[i%lenStates]
+            actions = self.mdp.getPossibleActions(state)
+            if self.mdp.isTerminal(state):
+                self.values[state] = 0
+            else:
+                for action in actions:
+                    val = 0
+                    transitions = self.mdp.getTransitionStatesAndProbs(state,action)
+                    for nextstate, prob in transitions:
+                        val += prob*(self.mdp.getReward(state,action,nextstate) + self.discount*currvalues[nextstate])
+                    val_list.append(val)
+                self.values[state] = max(val_list)
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     """
