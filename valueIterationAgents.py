@@ -220,7 +220,6 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
                             predecessors[SnP[0]] = {s}
 
         # Initialize an empty priority queue
-
         queue = util.PriorityQueue()
 
         # For each non-terminal state
