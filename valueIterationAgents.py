@@ -207,3 +207,47 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
 
+        # Compute predecessors of all states 
+        predecessors = {}
+        
+        for state in self.mdp.getStates():
+            for action in self.mdp.getPossibleActions(state):
+                for SnP in self.mdp.getTransitionStatesAndProbs(state, action):
+                    if SnP[0] in predecessors:
+                        predecessors[SnP[0]].add(state)
+                    else:
+                        predecessors[SnP[0]] = {state}
+
+        # Initialize an empty priority queue
+
+        queue = util.PriorityQueue()
+
+        # For each non-terminal state
+        for s in self.mdp.getStates():
+            if not self.mdp.isTerminal(s):
+                # Compute diff
+                maxQ = max(self.computeQValueFromValues(s, action) for action in self.mdp.getPossibleActions(s))
+                diff = abs(self.values[s] - maxQ)
+                # Push s into queue with priority -diff
+                queue.push(s, -diff)
+
+        # For iteration [0, self.iteration - 1]
+        for iteration in range(self.iterations):
+            # If queue is empty terminate
+            if queue.isEmpty():
+                break
+            # Pop state s off queue
+            s = queue.pop()
+            # Update s (if it is not a terminal state) in self.values
+            if not self.mdp.isTerminal(s):
+                maxQ = max(self.computeQValueFromValues(s, action) for action in self.mdp.getPossibleActions(s))
+                self.values[s] = maxQ
+            # For each predecessor p of s 
+            for p in predecessors[s]:
+                if not self.mdp.isTerminal(p):
+                    # Compute diff
+                    maxQ = max(self.computeQValueFromValues(s, action) for action in self.mdp.getPossibleActions(s))
+                    diff = abs(self.values[s] - maxQ)
+                    # If diff > theta, push p into queue with priority -diff
+                    if diff > self.theta:
+                        queue.push(p, -diff)
